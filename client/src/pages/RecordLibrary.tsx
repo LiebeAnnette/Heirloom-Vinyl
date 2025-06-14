@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useQuery, useMutation } from "@apollo/client";
 import { loggedIn, logout } from "../utils/auth";
 import {
@@ -9,20 +9,39 @@ import {
 } from "../utils/queries";
 import EditRecordModal from "../components/EditRecordModal";
 
+// Define record type
+interface RecordType {
+  _id: string;
+  artist: string;
+  album: string;
+}
+
+interface MyRecordsQueryData {
+  myRecords: RecordType[];
+}
+
 export default function RecordLibrary() {
-  const { loading, data, refetch } = useQuery(GET_MY_RECORDS);
+  const { loading, data, refetch } =
+    useQuery<MyRecordsQueryData>(GET_MY_RECORDS);
   const [addRecord] = useMutation(ADD_RECORD);
   const [deleteRecord] = useMutation(DELETE_RECORD);
   const [updateRecord] = useMutation(UPDATE_RECORD);
-  const [formState, setFormState] = useState({ artist: "", album: "" });
-  const [selectedRecord, setSelectedRecord] = useState(null);
 
-  const handleChange = (e) => {
+  const [formState, setFormState] = useState<{ artist: string; album: string }>(
+    {
+      artist: "",
+      album: "",
+    }
+  );
+
+  const [selectedRecord, setSelectedRecord] = useState<RecordType | null>(null);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormState({ ...formState, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       await addRecord({ variables: formState });

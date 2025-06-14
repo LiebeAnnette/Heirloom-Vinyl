@@ -1,7 +1,5 @@
-// client/src/utils/auth.js
-
 // Save token to localStorage
-export const login = (token) => {
+export const login = (token: string) => {
   localStorage.setItem("id_token", token);
 };
 
@@ -11,11 +9,11 @@ export const logout = () => {
 };
 
 // Get the token
-export const getToken = () => {
+export const getToken = (): string | null => {
   return localStorage.getItem("id_token");
 };
 
-// Check if token exists & is valid (no expiration check yet)
-export const loggedIn = () => {
+// Check if token exists
+export const loggedIn = (): boolean => {
   return !!localStorage.getItem("id_token");
 };

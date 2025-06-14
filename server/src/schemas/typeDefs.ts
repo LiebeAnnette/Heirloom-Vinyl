@@ -1,6 +1,7 @@
-const { gql } = require("apollo-server-express");
+// server/schemas/typeDefs.ts
+import { gql } from "apollo-server-express";
 
-const typeDefs = gql`
+export const typeDefs = gql`
   type User {
     _id: ID!
     username: String!
@@ -33,5 +34,3 @@ const typeDefs = gql`
     updateRecord(recordId: ID!, artist: String, album: String): Record
   }
 `;
-
-module.exports = typeDefs;
