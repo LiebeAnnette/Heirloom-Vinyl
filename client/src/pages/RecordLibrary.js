@@ -1,12 +1,21 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
-import { GET_MY_RECORDS, ADD_RECORD } from '../utils/queries';
-import { loggedIn, logout } from '../utils/auth';
+import React, { useState } from "react";
+import { useQuery, useMutation } from "@apollo/client";
+import { loggedIn, logout } from "../utils/auth";
+import {
+  GET_MY_RECORDS,
+  ADD_RECORD,
+  DELETE_RECORD,
+  UPDATE_RECORD,
+} from "../utils/queries";
+import EditRecordModal from "../components/EditRecordModal";
 
 export default function RecordLibrary() {
   const { loading, data, refetch } = useQuery(GET_MY_RECORDS);
   const [addRecord] = useMutation(ADD_RECORD);
-  const [formState, setFormState] = useState({ artist: '', album: '' });
+  const [deleteRecord] = useMutation(DELETE_RECORD);
+  const [updateRecord] = useMutation(UPDATE_RECORD);
+  const [formState, setFormState] = useState({ artist: "", album: "" });
+  const [selectedRecord, setSelectedRecord] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,8 +26,8 @@ export default function RecordLibrary() {
     e.preventDefault();
     try {
       await addRecord({ variables: formState });
-      setFormState({ artist: '', album: '' });
-      refetch(); // refresh the list
+      setFormState({ artist: "", album: "" });
+      refetch();
     } catch (err) {
       console.error(err);
     }
@@ -37,7 +46,7 @@ export default function RecordLibrary() {
     <div>
       <h2>Your Record Collection</h2>
 
-      <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
+      <form onSubmit={handleSubmit} style={{ marginBottom: "1rem" }}>
         <input
           type="text"
           name="artist"
@@ -57,7 +66,12 @@ export default function RecordLibrary() {
         <button type="submit">Add Record</button>
       </form>
 
-      <button onClick={() => { logout(); window.location.assign('/'); }}>
+      <button
+        onClick={() => {
+          logout();
+          window.location.assign("/");
+        }}
+      >
         Log Out
       </button>
 
@@ -68,9 +82,45 @@ export default function RecordLibrary() {
           {data?.myRecords?.map((record) => (
             <li key={record._id}>
               <strong>{record.artist}</strong> — <em>{record.album}</em>
+              <button
+                style={{ marginLeft: "1rem" }}
+                onClick={async () => {
+                  const confirmed = window.confirm("Delete this record?");
+                  if (confirmed) {
+                    await deleteRecord({ variables: { recordId: record._id } });
+                    refetch();
+                  }
+                }}
+              >
+                🗑 Delete
+              </button>
+              <button
+                style={{ marginLeft: "0.5rem" }}
+                onClick={() => setSelectedRecord(record)}
+              >
+                ✏️ Edit
+              </button>
             </li>
           ))}
         </ul>
+      )}
+
+      {selectedRecord && (
+        <EditRecordModal
+          record={selectedRecord}
+          onClose={() => setSelectedRecord(null)}
+          onSave={async ({ artist, album }) => {
+            await updateRecord({
+              variables: {
+                recordId: selectedRecord._id,
+                artist,
+                album,
+              },
+            });
+            refetch();
+            setSelectedRecord(null);
+          }}
+        />
       )}
     </div>
   );

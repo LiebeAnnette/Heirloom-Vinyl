@@ -55,3 +55,22 @@ export const SEARCH_RECORDS = gql`
     }
   }
 `;
+export const DELETE_RECORD = gql`
+  mutation deleteRecord($recordId: ID!) {
+    deleteRecord(recordId: $recordId) {
+      _id
+      artist
+      album
+    }
+  }
+`;
+
+export const UPDATE_RECORD = gql`
+  mutation updateRecord($recordId: ID!, $artist: String, $album: String) {
+    updateRecord(recordId: $recordId, artist: $artist, album: $album) {
+      _id
+      artist
+      album
+    }
+  }
+`;

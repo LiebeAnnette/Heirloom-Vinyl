@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-express');
+const { gql } = require("apollo-server-express");
 
 const typeDefs = gql`
   type User {
@@ -29,6 +29,8 @@ const typeDefs = gql`
     login(username: String!, password: String!): Auth
     addUser(username: String!, password: String!): Auth
     addRecord(artist: String!, album: String!): Record
+    deleteRecord(recordId: ID!): Record
+    updateRecord(recordId: ID!, artist: String, album: String): Record
   }
 `;
 

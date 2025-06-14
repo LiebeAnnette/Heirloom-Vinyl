@@ -58,6 +58,40 @@ const resolvers = {
       }
       throw new AuthenticationError("Not logged in");
     },
+    deleteRecord: async (_, { recordId }, context) => {
+      if (!context.user) throw new AuthenticationError("Not logged in");
+
+      const record = await Record.findOneAndDelete({
+        _id: recordId,
+        owner: context.user._id,
+      });
+
+      await User.findByIdAndUpdate(context.user._id, {
+        $pull: { records: recordId },
+      });
+
+      return record;
+    },
+
+    updateRecord: async (_, { recordId, artist, album }, context) => {
+      if (!context.user) throw new AuthenticationError("Not logged in");
+
+      const updated = await Record.findOneAndUpdate(
+        {
+          _id: recordId,
+          owner: context.user._id,
+        },
+        {
+          $set: {
+            ...(artist && { artist }),
+            ...(album && { album }),
+          },
+        },
+        { new: true }
+      );
+
+      return updated;
+    },
   },
 };
 
