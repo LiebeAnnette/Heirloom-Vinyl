@@ -1,22 +1,22 @@
 import React, { useState } from "react";
 import { useMutation } from "@apollo/client";
-import { LOGIN_USER } from "../utils/queries";
+import { ADD_USER } from "../utils/queries";
 import { login } from "../utils/auth";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [formState, setFormState] = useState({ username: "", password: "" });
-  const [loginUser] = useMutation(LOGIN_USER);
+  const [addUser] = useMutation(ADD_USER);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const { data } = await loginUser({ variables: formState });
-    login(data.login.token);
+    const { data } = await addUser({ variables: formState });
+    login(data.addUser.token);
     window.location.assign("/");
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Log In</h2>
+      <h2>Sign Up</h2>
       <input
         placeholder="Username"
         value={formState.username}
@@ -32,7 +32,7 @@ export default function LoginPage() {
           setFormState({ ...formState, password: e.target.value })
         }
       />
-      <button type="submit">Log In</button>
+      <button type="submit">Create Account</button>
     </form>
   );
 }

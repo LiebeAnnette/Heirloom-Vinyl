@@ -2,9 +2,9 @@
 
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LoginPage from "./pages/LoginPage.js";
-import SignupPage from "./pages/SignupPage.js";
-import RecordLibrary from "./pages/RecordLibrary.js";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import RecordLibrary from "./pages/RecordLibrary";
 
 function App() {
   return (

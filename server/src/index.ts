@@ -1,8 +1,8 @@
-const express = require("express");
-const { ApolloServer } = require("apollo-server-express");
-const db = require("./config/connection");
-const { typeDefs, resolvers } = require("./schemas");
-const { authMiddleware } = require("./utils/auth");
+import express from "express";
+import { ApolloServer } from "apollo-server-express";
+import db from "./config/connection";
+import { typeDefs, resolvers } from "./schemas";
+import { authMiddleware } from "./utils/auth";
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -18,7 +18,7 @@ async function startServer() {
   });
 
   await server.start();
-  server.applyMiddleware({ app });
+  server.applyMiddleware({ app: app as any });
 
   db.once("open", () => {
     app.listen(PORT, () => {
