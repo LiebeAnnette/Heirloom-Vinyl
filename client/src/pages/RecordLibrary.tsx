@@ -39,6 +39,11 @@ export default function RecordLibrary() {
     genre: "",
     isFavorite: false,
     listened: false,
+    touched: {
+      genre: false,
+      isFavorite: false,
+      listened: false,
+    },
   });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -104,7 +109,11 @@ export default function RecordLibrary() {
           <select
             value={bulkForm.genre}
             onChange={(e) =>
-              setBulkForm((prev) => ({ ...prev, genre: e.target.value }))
+              setBulkForm((prev) => ({
+                ...prev,
+                genre: e.target.value,
+                touched: { ...prev.touched, genre: true },
+              }))
             }
           >
             <option value="">-- Select Genre --</option>
@@ -116,15 +125,34 @@ export default function RecordLibrary() {
           </select>
         </label>
 
-        <label style={{ marginLeft: "1rem" }}>
+        <label>
           <input
             type="checkbox"
             checked={bulkForm.isFavorite}
             onChange={(e) =>
-              setBulkForm((prev) => ({ ...prev, isFavorite: e.target.checked }))
+              setBulkForm((prev) => ({
+                ...prev,
+                isFavorite: e.target.checked,
+                touched: { ...prev.touched, isFavorite: true },
+              }))
             }
           />
           Favorite
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={bulkForm.listened}
+            onChange={(e) =>
+              setBulkForm((prev) => ({
+                ...prev,
+                listened: e.target.checked,
+                touched: { ...prev.touched, listened: true },
+              }))
+            }
+          />
+          Listened
         </label>
 
         <label style={{ marginLeft: "1rem" }}>
@@ -142,17 +170,34 @@ export default function RecordLibrary() {
       <button
         disabled={selectedIds.length === 0}
         onClick={async () => {
-          const updates = {
-            ...(bulkForm.genre && { genre: bulkForm.genre }),
-            isFavorite: bulkForm.isFavorite,
-            listened: bulkForm.listened,
-          };
+          const updates: any = {};
+
+          if (bulkForm.touched.genre && bulkForm.genre) {
+            updates.genre = bulkForm.genre;
+          }
+          if (bulkForm.touched.isFavorite) {
+            updates.isFavorite = bulkForm.isFavorite;
+          }
+          if (bulkForm.touched.listened) {
+            updates.listened = bulkForm.listened;
+          }
 
           try {
             await updateMultipleRecords({
               variables: { recordIds: selectedIds, updates },
             });
             setSelectedIds([]);
+            setBulkForm({
+              genre: "",
+              isFavorite: false,
+              listened: false,
+              touched: {
+                genre: false,
+                isFavorite: false,
+                listened: false,
+              },
+            });
+
             refetch();
           } catch (err) {
             console.error("Bulk update failed", err);
