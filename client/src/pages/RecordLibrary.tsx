@@ -6,6 +6,7 @@ import {
   ADD_RECORD,
   DELETE_RECORD,
   UPDATE_RECORD,
+  UPDATE_MULTIPLE_RECORDS,
 } from "../utils/queries";
 import EditRecordModal from "../components/EditRecordModal";
 
@@ -14,6 +15,9 @@ interface RecordType {
   _id: string;
   artist: string;
   album: string;
+  genre?: string;
+  isFavorite?: boolean;
+  listened?: boolean;
 }
 
 interface MyRecordsQueryData {
@@ -26,15 +30,16 @@ export default function RecordLibrary() {
   const [addRecord] = useMutation(ADD_RECORD);
   const [deleteRecord] = useMutation(DELETE_RECORD);
   const [updateRecord] = useMutation(UPDATE_RECORD);
+  const [updateMultipleRecords] = useMutation(UPDATE_MULTIPLE_RECORDS);
 
-  const [formState, setFormState] = useState<{ artist: string; album: string }>(
-    {
-      artist: "",
-      album: "",
-    }
-  );
-
+  const [formState, setFormState] = useState({ artist: "", album: "" });
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedRecord, setSelectedRecord] = useState<RecordType | null>(null);
+  const [bulkForm, setBulkForm] = useState({
+    genre: "",
+    isFavorite: false,
+    listened: false,
+  });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -93,35 +98,122 @@ export default function RecordLibrary() {
       >
         Log Out
       </button>
+      <div style={{ marginTop: "1rem" }}>
+        <label>
+          Genre:
+          <select
+            value={bulkForm.genre}
+            onChange={(e) =>
+              setBulkForm((prev) => ({ ...prev, genre: e.target.value }))
+            }
+          >
+            <option value="">-- Select Genre --</option>
+            <option value="Rock">Rock</option>
+            <option value="Jazz">Jazz</option>
+            <option value="Hip-Hop">Hip-Hop</option>
+            <option value="Classical">Classical</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
 
+        <label style={{ marginLeft: "1rem" }}>
+          <input
+            type="checkbox"
+            checked={bulkForm.isFavorite}
+            onChange={(e) =>
+              setBulkForm((prev) => ({ ...prev, isFavorite: e.target.checked }))
+            }
+          />
+          Favorite
+        </label>
+
+        <label style={{ marginLeft: "1rem" }}>
+          <input
+            type="checkbox"
+            checked={bulkForm.listened}
+            onChange={(e) =>
+              setBulkForm((prev) => ({ ...prev, listened: e.target.checked }))
+            }
+          />
+          Listened
+        </label>
+      </div>
+
+      <button
+        disabled={selectedIds.length === 0}
+        onClick={async () => {
+          const updates = {
+            ...(bulkForm.genre && { genre: bulkForm.genre }),
+            isFavorite: bulkForm.isFavorite,
+            listened: bulkForm.listened,
+          };
+
+          try {
+            await updateMultipleRecords({
+              variables: { recordIds: selectedIds, updates },
+            });
+            setSelectedIds([]);
+            refetch();
+          } catch (err) {
+            console.error("Bulk update failed", err);
+          }
+        }}
+      >
+        Apply Bulk Update
+      </button>
       {loading ? (
         <p>Loading records...</p>
       ) : (
-        <ul>
-          {data?.myRecords?.map((record) => (
-            <li key={record._id}>
-              <strong>{record.artist}</strong> — <em>{record.album}</em>
-              <button
-                style={{ marginLeft: "1rem" }}
-                onClick={async () => {
-                  const confirmed = window.confirm("Delete this record?");
-                  if (confirmed) {
-                    await deleteRecord({ variables: { recordId: record._id } });
-                    refetch();
-                  }
-                }}
-              >
-                🗑 Delete
-              </button>
-              <button
-                style={{ marginLeft: "0.5rem" }}
-                onClick={() => setSelectedRecord(record)}
-              >
-                ✏️ Edit
-              </button>
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul>
+            {data?.myRecords?.map((record) => (
+              <li key={record._id}>
+                <input
+                  type="checkbox"
+                  checked={selectedIds.includes(record._id)}
+                  onChange={(e) => {
+                    setSelectedIds((prev) =>
+                      e.target.checked
+                        ? [...prev, record._id]
+                        : prev.filter((id) => id !== record._id)
+                    );
+                  }}
+                />
+                <strong>{record.artist}</strong> — <em>{record.album}</em>
+                {/* Display genre, favorite, and listened status */}
+                <div style={{ marginLeft: "1rem", fontSize: "0.9rem" }}>
+                  {record.genre && <span>🎵 Genre: {record.genre}</span>}
+                  {record.isFavorite && (
+                    <span style={{ marginLeft: "1rem" }}>⭐ Favorite</span>
+                  )}
+                  {record.listened && (
+                    <span style={{ marginLeft: "1rem" }}>👂 Listened</span>
+                  )}
+                </div>
+                <button
+                  style={{ marginLeft: "1rem" }}
+                  onClick={async () => {
+                    const confirmed = window.confirm("Delete this record?");
+                    if (confirmed) {
+                      await deleteRecord({
+                        variables: { recordId: record._id },
+                      });
+                      refetch();
+                    }
+                  }}
+                >
+                  🗑 Delete
+                </button>
+                <button
+                  style={{ marginLeft: "0.5rem" }}
+                  onClick={() => setSelectedRecord(record)}
+                >
+                  ✏️ Edit
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
       {selectedRecord && (

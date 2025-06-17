@@ -149,6 +149,37 @@ const resolvers = {
 
       return updated;
     },
+    updateMultipleRecords: async (
+      _: unknown,
+      {
+        recordIds,
+        updates,
+      }: {
+        recordIds: string[];
+        updates: { genre?: string; isFavorite?: boolean; listened?: boolean };
+      },
+      context: Context
+    ) => {
+      if (!context.user) throw new AuthenticationError("Not logged in");
+
+      const result = await Record.updateMany(
+        {
+          _id: { $in: recordIds },
+          owner: context.user._id,
+        },
+        {
+          $set: updates,
+        }
+      );
+
+      // Optionally return the updated records:
+      const updatedRecords = await Record.find({
+        _id: { $in: recordIds },
+        owner: context.user._id,
+      });
+
+      return updatedRecords;
+    },
   },
 };
 

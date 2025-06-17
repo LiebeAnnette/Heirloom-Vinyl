@@ -4,6 +4,9 @@ export interface IRecord extends Document {
   artist: string;
   album: string;
   owner: Types.ObjectId;
+  genre?: string;
+  isFavorite?: boolean;
+  listened?: boolean;
 }
 
 const recordSchema = new Schema<IRecord>({
@@ -20,6 +23,9 @@ const recordSchema = new Schema<IRecord>({
     ref: "User",
     required: true,
   },
+  genre: { type: String },
+  isFavorite: { type: Boolean, default: false },
+  listened: { type: Boolean, default: false },
 });
 
 const Record = model<IRecord>("Record", recordSchema);

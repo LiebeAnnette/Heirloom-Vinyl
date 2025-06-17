@@ -42,6 +42,9 @@ export const GET_MY_RECORDS = gql`
       _id
       artist
       album
+      genre
+      isFavorite
+      listened
     }
   }
 `;
@@ -71,6 +74,21 @@ export const UPDATE_RECORD = gql`
       _id
       artist
       album
+    }
+  }
+`;
+export const UPDATE_MULTIPLE_RECORDS = gql`
+  mutation updateMultipleRecords(
+    $recordIds: [ID!]!
+    $updates: RecordUpdateInput!
+  ) {
+    updateMultipleRecords(recordIds: $recordIds, updates: $updates) {
+      _id
+      artist
+      album
+      genre
+      isFavorite
+      listened
     }
   }
 `;

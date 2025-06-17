@@ -13,6 +13,9 @@ export const typeDefs = gql`
     artist: String!
     album: String!
     owner: User!
+    genre: String
+    isFavorite: Boolean
+    listened: Boolean
   }
 
   type Auth {
@@ -32,5 +35,14 @@ export const typeDefs = gql`
     addRecord(artist: String!, album: String!): Record
     deleteRecord(recordId: ID!): Record
     updateRecord(recordId: ID!, artist: String, album: String): Record
+    updateMultipleRecords(
+      recordIds: [ID!]!
+      updates: RecordUpdateInput!
+    ): [Record]
+  }
+  input RecordUpdateInput {
+    genre: String
+    isFavorite: Boolean
+    listened: Boolean
   }
 `;
