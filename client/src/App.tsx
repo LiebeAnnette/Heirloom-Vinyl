@@ -10,7 +10,7 @@ function App() {
   return (
     <Router>
       <div className="app-container" style={{ padding: "1rem" }}>
-        <h1>🎵 Heirloom Records</h1>
+        <h1>🎵 Heirloom Vinyl</h1>
         <Routes>
           <Route path="/" element={<RecordLibrary />} />
           <Route path="/login" element={<LoginPage />} />
