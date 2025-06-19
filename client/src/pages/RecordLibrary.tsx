@@ -14,6 +14,9 @@ interface RecordType {
   _id: string;
   artist: string;
   album: string;
+  genre?: string;
+  isFavorite?: boolean;
+  listened?: boolean;
 }
 
 interface MyRecordsQueryData {
@@ -27,25 +30,43 @@ export default function RecordLibrary() {
   const [deleteRecord] = useMutation(DELETE_RECORD);
   const [updateRecord] = useMutation(UPDATE_RECORD);
 
-  const [formState, setFormState] = useState<{ artist: string; album: string }>(
-    {
-      artist: "",
-      album: "",
-    }
-  );
+  const [formState, setFormState] = useState({
+    artist: "",
+    album: "",
+    genre: "",
+    isFavorite: false,
+    listened: false,
+  });
 
   const [selectedRecord, setSelectedRecord] = useState<RecordType | null>(null);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormState({ ...formState, [name]: value });
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const target = e.target;
+    const { name, value } = target;
+    const isCheckbox =
+      target instanceof HTMLInputElement && target.type === "checkbox";
+    const checked = isCheckbox ? target.checked : undefined;
+
+    setFormState((prev) => ({
+      ...prev,
+      [name]: isCheckbox ? checked : value,
+    }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       await addRecord({ variables: formState });
-      setFormState({ artist: "", album: "" });
+      setFormState({
+        artist: "",
+        album: "",
+        genre: "",
+        isFavorite: false,
+        listened: false,
+      });
+
       refetch();
     } catch (err) {
       console.error(err);
@@ -82,6 +103,36 @@ export default function RecordLibrary() {
           onChange={handleChange}
           required
         />
+
+        <select name="genre" value={formState.genre} onChange={handleChange}>
+          <option value="">-- Select Genre --</option>
+          <option value="Rock">Rock</option>
+          <option value="Jazz">Jazz</option>
+          <option value="Hip-Hop">Hip-Hop</option>
+          <option value="Classical">Classical</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <label style={{ marginLeft: "1rem" }}>
+          <input
+            type="checkbox"
+            name="isFavorite"
+            checked={formState.isFavorite}
+            onChange={handleChange}
+          />
+          Favorite
+        </label>
+
+        <label style={{ marginLeft: "1rem" }}>
+          <input
+            type="checkbox"
+            name="listened"
+            checked={formState.listened}
+            onChange={handleChange}
+          />
+          Listened
+        </label>
+
         <button type="submit">Add Record</button>
       </form>
 
@@ -99,26 +150,41 @@ export default function RecordLibrary() {
       ) : (
         <ul>
           {data?.myRecords?.map((record) => (
-            <li key={record._id}>
+            <li key={record._id} style={{ marginBottom: "1rem" }}>
               <strong>{record.artist}</strong> — <em>{record.album}</em>
-              <button
-                style={{ marginLeft: "1rem" }}
-                onClick={async () => {
-                  const confirmed = window.confirm("Delete this record?");
-                  if (confirmed) {
-                    await deleteRecord({ variables: { recordId: record._id } });
-                    refetch();
-                  }
-                }}
-              >
-                🗑 Delete
-              </button>
-              <button
-                style={{ marginLeft: "0.5rem" }}
-                onClick={() => setSelectedRecord(record)}
-              >
-                ✏️ Edit
-              </button>
+              {record.genre && (
+                <>
+                  {" | "}
+                  <span>Genre: {record.genre}</span>
+                </>
+              )}
+              {record.isFavorite && (
+                <>
+                  {" | "}
+                  <span>★ Favorite</span>
+                </>
+              )}
+              {" | "}
+              {record.listened ? "🎧 Listened" : "🔇 Not Listened"}
+              <div style={{ marginTop: "0.5rem" }}>
+                <button
+                  style={{ marginRight: "0.5rem" }}
+                  onClick={async () => {
+                    const confirmed = window.confirm("Delete this record?");
+                    if (confirmed) {
+                      await deleteRecord({
+                        variables: { recordId: record._id },
+                      });
+                      refetch();
+                    }
+                  }}
+                >
+                  🗑 Delete
+                </button>
+                <button onClick={() => setSelectedRecord(record)}>
+                  ✏️ Edit
+                </button>
+              </div>
             </li>
           ))}
         </ul>
@@ -128,12 +194,15 @@ export default function RecordLibrary() {
         <EditRecordModal
           record={selectedRecord}
           onClose={() => setSelectedRecord(null)}
-          onSave={async ({ artist, album }) => {
+          onSave={async ({ artist, album, genre, isFavorite, listened }) => {
             await updateRecord({
               variables: {
                 recordId: selectedRecord._id,
                 artist,
                 album,
+                genre,
+                isFavorite,
+                listened,
               },
             });
             refetch();

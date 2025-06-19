@@ -5,12 +5,21 @@ interface RecordType {
   _id: string;
   artist: string;
   album: string;
+  genre?: string;
+  isFavorite?: boolean;
+  listened?: boolean;
 }
 
 interface EditRecordModalProps {
   record: RecordType;
   onClose: () => void;
-  onSave: (updated: { artist: string; album: string }) => void;
+  onSave: (updated: {
+    artist: string;
+    album: string;
+    genre?: string;
+    isFavorite?: boolean;
+    listened?: boolean;
+  }) => void;
 }
 
 export default function EditRecordModal({
@@ -20,17 +29,23 @@ export default function EditRecordModal({
 }: EditRecordModalProps) {
   const [artist, setArtist] = useState<string>("");
   const [album, setAlbum] = useState<string>("");
+  const [genre, setGenre] = useState<string>("");
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [listened, setListened] = useState<boolean>(false);
 
   useEffect(() => {
     if (record) {
       setArtist(record.artist);
       setAlbum(record.album);
+      setGenre(record.genre || "");
+      setIsFavorite(record.isFavorite || false);
+      setListened(record.listened || false);
     }
   }, [record]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSave({ artist, album });
+    onSave({ artist, album, genre, isFavorite, listened });
   };
 
   const handleChange =
@@ -57,6 +72,37 @@ export default function EditRecordModal({
             placeholder="Album"
             style={styles.input}
           />
+          <select
+            value={genre}
+            onChange={(e) => setGenre(e.target.value)}
+            style={styles.input}
+          >
+            <option value="">-- Select Genre --</option>
+            <option value="Rock">Rock</option>
+            <option value="Jazz">Jazz</option>
+            <option value="Hip-Hop">Hip-Hop</option>
+            <option value="Classical">Classical</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <label>
+            <input
+              type="checkbox"
+              checked={isFavorite}
+              onChange={(e) => setIsFavorite(e.target.checked)}
+            />{" "}
+            Favorite
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              checked={listened}
+              onChange={(e) => setListened(e.target.checked)}
+            />{" "}
+            Listened
+          </label>
+
           <div style={styles.buttons}>
             <button type="submit" style={styles.save}>
               Save
