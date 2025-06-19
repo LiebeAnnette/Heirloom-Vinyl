@@ -27,21 +27,39 @@ export const ADD_USER = gql`
 `;
 
 export const ADD_RECORD = gql`
-  mutation addRecord($artist: String!, $album: String!) {
-    addRecord(artist: $artist, album: $album) {
+  mutation AddRecord(
+    $artist: String!
+    $album: String!
+    $genre: String
+    $isFavorite: Boolean
+    $listened: Boolean
+  ) {
+    addRecord(
+      artist: $artist
+      album: $album
+      genre: $genre
+      isFavorite: $isFavorite
+      listened: $listened
+    ) {
       _id
       artist
       album
+      genre
+      isFavorite
+      listened
     }
   }
 `;
 
 export const GET_MY_RECORDS = gql`
-  query getMyRecords {
+  query GetMyRecords {
     myRecords {
       _id
       artist
       album
+      genre
+      isFavorite
+      listened
     }
   }
 `;
@@ -66,11 +84,28 @@ export const DELETE_RECORD = gql`
 `;
 
 export const UPDATE_RECORD = gql`
-  mutation updateRecord($recordId: ID!, $artist: String, $album: String) {
-    updateRecord(recordId: $recordId, artist: $artist, album: $album) {
+  mutation updateRecord(
+    $recordId: ID!
+    $artist: String
+    $album: String
+    $genre: String
+    $isFavorite: Boolean
+    $listened: Boolean
+  ) {
+    updateRecord(
+      recordId: $recordId
+      artist: $artist
+      album: $album
+      genre: $genre
+      isFavorite: $isFavorite
+      listened: $listened
+    ) {
       _id
       artist
       album
+      genre
+      isFavorite
+      listened
     }
   }
 `;

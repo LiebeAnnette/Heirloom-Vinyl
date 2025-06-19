@@ -7,12 +7,14 @@ export const typeDefs = gql`
     username: String!
     records: [Record]
   }
-
   type Record {
     _id: ID!
     artist: String!
     album: String!
     owner: User!
+    genre: String
+    isFavorite: Boolean
+    listened: Boolean
   }
 
   type Auth {
@@ -26,11 +28,34 @@ export const typeDefs = gql`
     searchRecords(query: String!): [Record]
   }
 
-  type Mutation {
-    login(username: String!, password: String!): Auth
-    addUser(username: String!, password: String!): Auth
-    addRecord(artist: String!, album: String!): Record
-    deleteRecord(recordId: ID!): Record
-    updateRecord(recordId: ID!, artist: String, album: String): Record
+  type Record {
+    _id: ID!
+    artist: String!
+    album: String!
+    owner: User!
+    genre: String
+    isFavorite: Boolean
+    listened: Boolean
   }
+
+  type Mutation {
+  login(username: String!, password: String!): Auth
+  addUser(username: String!, password: String!): Auth
+  addRecord(
+    artist: String!
+    album: String!
+    genre: String
+    isFavorite: Boolean
+    listened: Boolean
+  ): Record
+  deleteRecord(recordId: ID!): Record
+  updateRecord(
+    recordId: ID!
+    artist: String
+    album: String
+    genre: String
+    isFavorite: Boolean
+    listened: Boolean
+  ): Record
+}
 `;

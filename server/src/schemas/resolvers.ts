@@ -23,12 +23,18 @@ interface LoginArgs {
 interface AddRecordArgs {
   artist: string;
   album: string;
+  genre?: string;
+  isFavorite?: boolean;
+  listened?: boolean;
 }
 
 interface UpdateRecordArgs {
   recordId: string;
   artist?: string;
   album?: string;
+  genre?: string;
+  isFavorite?: boolean;
+  listened?: boolean;
 }
 
 interface DeleteRecordArgs {
@@ -92,7 +98,7 @@ const resolvers = {
 
     addRecord: async (
       _: unknown,
-      { artist, album }: AddRecordArgs,
+      { artist, album, genre, isFavorite, listened }: AddRecordArgs,
       context: Context
     ) => {
       if (!context.user) throw new AuthenticationError("Not logged in");
@@ -100,6 +106,9 @@ const resolvers = {
       const record = await Record.create({
         artist,
         album,
+        genre,
+        isFavorite,
+        listened,
         owner: context.user._id,
       });
 
@@ -131,19 +140,29 @@ const resolvers = {
 
     updateRecord: async (
       _: unknown,
-      { recordId, artist, album }: UpdateRecordArgs,
+      {
+        recordId,
+        artist,
+        album,
+        genre,
+        isFavorite,
+        listened,
+      }: UpdateRecordArgs,
       context: Context
     ) => {
       if (!context.user) throw new AuthenticationError("Not logged in");
 
+      const updatedFields: any = {};
+
+      if (artist !== undefined) updatedFields.artist = artist;
+      if (album !== undefined) updatedFields.album = album;
+      if (genre !== undefined) updatedFields.genre = genre;
+      if (isFavorite !== undefined) updatedFields.isFavorite = isFavorite;
+      if (listened !== undefined) updatedFields.listened = listened;
+
       const updated = await Record.findOneAndUpdate(
         { _id: recordId, owner: context.user._id },
-        {
-          $set: {
-            ...(artist && { artist }),
-            ...(album && { album }),
-          },
-        },
+        { $set: updatedFields },
         { new: true }
       );
 

@@ -3,6 +3,9 @@ import { Schema, model, Document, Types } from "mongoose";
 export interface IRecord extends Document {
   artist: string;
   album: string;
+  genre?: string;
+  isFavorite?: boolean;
+  listened?: boolean;
   owner: Types.ObjectId;
 }
 
@@ -14,6 +17,15 @@ const recordSchema = new Schema<IRecord>({
   album: {
     type: String,
     required: true,
+  },
+  genre: {
+    type: String,
+  },
+  isFavorite: {
+    type: Boolean,
+  },
+  listened: {
+    type: Boolean,
   },
   owner: {
     type: Schema.Types.ObjectId,
