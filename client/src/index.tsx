@@ -11,8 +11,16 @@ import {
 
 import { setContext } from "@apollo/client/link/context";
 
+// TODO: FOR LOCAL
+
+// const httpLink = createHttpLink({
+//   uri: "http://localhost:3001/graphql",
+// });
+
+// TODO: FOR DEPLOY
+
 const httpLink = createHttpLink({
-  uri: "http://localhost:3001/graphql",
+  uri: process.env.REACT_APP_API_URL,
 });
 
 const authLink = setContext((_, { headers }) => {
